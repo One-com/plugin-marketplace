@@ -1,0 +1,13 @@
+{
+  "name": "groupone/marketplace",
+  "description": "Marketplace Module for WordPress plugins",
+  "type": "library",
+  "autoload": {
+    "psr-4": {
+      "Onecom\\Marketplace\\": "./src/"
+    }
+  },
+  "require": {
+    "php": ">=7.4"
+  }
+}
