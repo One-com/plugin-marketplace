@@ -16,3 +16,23 @@ A reusable WordPress plugin module for managing and displaying a marketplace of 
 - **Plugin Family-inspired** architecture for install/activate handling.
 
 ---
+## Usage (Inside WordPress)
+
+1. Require the module in your plugin and boot it:
+
+```php
+require_once __DIR__ . '/vendor/autoload.php';
+
+\Onecom\Marketplace\Marketplace::class::run([
+    'page_title' => 'Plugin Marketplace',
+    'menu_title' => 'Marketplace',
+    'menu_slug'  => 'plugin-marketplace',
+    'api_url'    => '',           // Optional, external API if needed
+    'custom_css' => '',           // Optional, path to custom CSS
+]);
+
+2.	The module will:
+	•	Register a submenu page under the WordPress admin menu.
+	•	Enqueue the React frontend automatically.
+	•	Localize marketplaceConfig for use in React.
+	•	Register REST API endpoint at /wp-json/marketplace/v1/plugins.
