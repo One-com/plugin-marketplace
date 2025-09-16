@@ -13,12 +13,35 @@ A reusable WordPress plugin module for managing and displaying a marketplace of 
 - **Flexible CSS loading** – custom or default styles.
 - **Composer-ready** with PSR-4 autoloading.
 - **Reusable by other plugin developers** with minimal setup.
-- **Plugin Family-inspired** architecture for install/activate handling.
 
 ---
 ## Usage (Inside WordPress)
 
-1. Require the module in your plugin and boot it:
+
+## Installation
+
+### Using Composer
+
+1. Add your Marketplace module as a Composer dependency in composer.json of your plugin:
+
+```bash
+
+{
+"require": {
+    "Groupone/marketplace-module": "1.0.0"
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@gitlab.group.one:wp-in/marketplace.git"
+    }
+  ]
+}
+
+2. composer install
+
+
+3. Require the module in your plugin and boot it:
 
 ```php
 require_once __DIR__ . '/vendor/autoload.php';
@@ -31,7 +54,7 @@ require_once __DIR__ . '/vendor/autoload.php';
     'custom_css' => '',           // Optional, path to custom CSS
 ]);
 
-2.	The module will:
+3.	The module will:
 	•	Register a submenu page under the WordPress admin menu.
 	•	Enqueue the React frontend automatically.
 	•	Localize marketplaceConfig for use in React.
