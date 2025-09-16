@@ -37,9 +37,8 @@ A reusable WordPress plugin module for managing and displaying a marketplace of 
     }
   ]
 }
-
+````
 2. composer install
-
 
 3. Require the module in your plugin and boot it:
 
@@ -47,14 +46,15 @@ A reusable WordPress plugin module for managing and displaying a marketplace of 
 require_once __DIR__ . '/vendor/autoload.php';
 
 \Onecom\Marketplace\Marketplace::class::run([
+    'parent_menu_slug' => '', // menu slug under which the module should appear
     'page_title' => 'Plugin Marketplace',
     'menu_title' => 'Marketplace',
     'menu_slug'  => 'plugin-marketplace',
     'api_url'    => '',           // Optional, external API if needed
     'custom_css' => '',           // Optional, path to custom CSS
 ]);
-
-3.	The module will:
+````
+4. The module will:
 	•	Register a submenu page under the WordPress admin menu.
 	•	Enqueue the React frontend automatically.
 	•	Localize marketplaceConfig for use in React.
