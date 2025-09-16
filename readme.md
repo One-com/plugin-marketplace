@@ -55,7 +55,9 @@ require_once __DIR__ . '/vendor/autoload.php';
 ]);
 ````
 4. The module will:
-	•	Register a submenu page under the WordPress admin menu.
-	•	Enqueue the React frontend automatically.
-	•	Localize marketplaceConfig for use in React.
-	•	Register REST API endpoint at /wp-json/marketplace/v1/plugins.
+
+
+	• Register a submenu page under the WordPress admin menu.
+	• Enqueue the React frontend automatically.
+	• Localize marketplaceConfig for use in React.
+	• Register REST API endpoint at /wp-json/marketplace/v1/plugins.
