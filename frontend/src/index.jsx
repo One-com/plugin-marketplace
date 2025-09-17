@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from '@wordpress/element';
-import { createRoot } from "@wordpress/element";
+import React, { useState, useEffect } from "react";
+import { createRoot } from "react-dom/client";
 import {normalizePlugins} from "./components/normalised-plugins";
 import Marketplace from "./components/MarketPlace";
 
@@ -35,3 +35,5 @@ export function initMarketplaceApp(config) {
         root.render(<MarketplaceApp {...config} />);
     }
 }
+
+export default MarketplaceApp;

@@ -1,6 +1,4 @@
-import { useState, useEffect } from "@wordpress/element"; // WP-provided React
-import { Button, Card, CardBody } from "@wordpress/components";
-import ToggleButton from "../../../../../src/components/ToggleButton";
+import React, { useState, useEffect } from "react";
 import {normalizePlugins} from "./normalised-plugins";
 import PluginActions from "./PluginActions";
 
@@ -12,7 +10,7 @@ export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enabl
     useEffect(() => {
         async function fetchPlugins() {
             try {
-                const res = await fetch(`${apiBaseUrl}plugins`);
+                const res = await fetch(`${apiBaseUrl}`);
                 const json = await res.json();
                 const normalized = normalizePlugins(json);
                 setPlugins(normalized);
@@ -31,24 +29,31 @@ export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enabl
 
         try {
             let url = `${apiBaseUrl}/${action}/${plugin.slug}`;
+
+            // prepare encoded download param (safe if plugin.download is undefined)
+            const downloadParam = `download_url=${encodeURIComponent(plugin.download || '')}`;
+
             if (useWPHandlers) {
-                url = `${wpConfig.ajax_url}?action=marketplace_${action}_plugin&_wpnonce=${wpConfig.nonce}&slug=${plugin.slug}`;
+                // original WP-AJAX URL + download_url appended
+                url = `${wpConfig.ajax_url}?action=marketplace_${action}_plugin&_wpnonce=${wpConfig.nonce}&slug=${plugin.slug}&${downloadParam}`;
+            } else {
+                // append download_url to non-WP URL (adds ? or & correctly)
+                url = url + (url.includes('?') ? '&' : '?') + downloadParam;
             }
 
             const res = await fetch(url, { method: "POST" });
             const result = await res.json();
 
             if (result.success) {
-                // ✅ Refresh list or update plugin state locally
                 setPlugins(prev =>
                     prev.map(p =>
                         p.slug === plugin.slug
-                            ? { ...p, installed: true, activated: action === "activate" }
+                            ? { ...p, installed: result.data.installed, activated: result.data.activated }
                             : p
                     )
                 );
             } else {
-                alert(result.message || "Failed to perform action");
+                alert(result.data?.message || "Failed to perform action");
             }
         } catch (err) {
             console.error("Plugin action failed", err);
@@ -73,12 +78,13 @@ export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enabl
                         <p>{plugin.description ? plugin.description : plugin.shortDescription} &nbsp;&nbsp;
                         </p>
                     </div>
-                    {/* ✅ PluginActions here */}
+                    {useWPHandlers === true &&
                     <PluginActions
                         plugin={plugin}
                         pluginInAction={pluginInAction}
                         onAction={handlePluginAction}
                     />
+                    }
                 </div>
             ))}
         </div>

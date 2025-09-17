@@ -87,7 +87,7 @@ class MarketplaceController {
 
 		// ✅ Localize JS with config
 		wp_localize_script( 'marketplace-frontend', 'marketplaceConfig', [
-			'apiBaseUrl' => trailingslashit( rest_url( 'marketplace/v1' ) ),
+			'apiBaseUrl' => trailingslashit( rest_url( 'marketplace/v1/plugins' ) ),
 			'apiUrl'     => $this->config['api_url'],
 			'useWPHandlers' => true,
 			'wpConfig' => [
@@ -143,61 +143,123 @@ class MarketplaceController {
 	 * Install plugin via WP_Upgrader
 	 */
 	public function ajax_install_plugin() {
-		check_ajax_referer( 'marketplace_nonce' );
+		check_ajax_referer( 'marketplace_nonce', 'nonce' );
 
-		if ( empty( $_REQUEST['slug'] ) ) {
-			wp_send_json_error( [ 'message' => 'Missing plugin slug' ] );
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			wp_send_json_error([ 'message' => __( 'Permission denied', 'onecom-wp' ) ]);
 		}
 
-		include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-		include_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 
-		$slug = sanitize_text_field( $_REQUEST['slug'] );
-		$api  = plugins_api( 'plugin_information', [ 'slug' => $slug, 'fields' => [ 'sections' => false ] ] );
+		$slug        = sanitize_text_field( $_REQUEST['slug'] ?? '' );
+		$download_url = esc_url_raw( $_REQUEST['download_url'] ?? '' );
 
-		if ( is_wp_error( $api ) ) {
-			wp_send_json_error( [ 'message' => $api->get_error_message() ] );
+		if ( empty( $slug ) || empty( $download_url ) ) {
+			wp_send_json_error( [ 'message' => __( 'Invalid plugin data.', 'text-domain' ) ] );
 		}
 
-		$upgrader = new \Plugin_Upgrader();
-		$result   = $upgrader->install( $api->download_link );
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+
+		$upgrader = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
+		$result   = $upgrader->install( $download_url ); // ✅ use URL from React
 
 		if ( is_wp_error( $result ) ) {
 			wp_send_json_error( [ 'message' => $result->get_error_message() ] );
 		}
 
-		wp_send_json_success( [ 'message' => __( 'Plugin installed successfully', 'text-domain' ) ] );
+		wp_send_json_success([
+			'message'   => __( 'Plugin installed successfully', 'onecom-wp' ),
+			'installed' => true,
+			'activated' => false,
+		]);
+	}
+
+	/**
+	 * Check if plugin is installed.
+	 *
+	 * @param string $slug Plugin slug if found.
+	 * @return boolean
+	 */
+	private function is_installed( $slug = '' ): bool {
+		return file_exists( WP_PLUGIN_DIR . '/' .  $slug  );
 	}
 
 	public function ajax_activate_plugin() {
-		check_ajax_referer( 'marketplace_nonce' );
-
-		if ( empty( $_REQUEST['slug'] ) ) {
-			wp_send_json_error( [ 'message' => 'Missing plugin slug' ] );
+		if ( ! current_user_can( 'activate_plugins' ) ) {
+			wp_send_json_error( [ 'message' => __( 'You do not have permission to activate plugins.', 'text-domain' ) ] );
 		}
 
-		$slug = sanitize_text_field( $_REQUEST['slug'] );
-		$plugin_file = $slug . '/' . $slug . '.php';
+		check_ajax_referer( 'marketplace_nonce', '_wpnonce' );
+
+		$slug = isset( $_REQUEST['slug'] ) ? sanitize_key( wp_unslash( $_REQUEST['slug'] ) ) : '';
+
+		if ( empty( $slug ) ) {
+			wp_send_json_error( [ 'message' => __( 'Missing plugin slug.', 'text-domain' ) ] );
+		}
+
+		// Load the list of installed plugins
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		$plugins = get_plugins();
+
+		// Try to find the plugin main file by slug
+		$plugin_file = '';
+		foreach ( $plugins as $file => $data ) {
+			if ( strpos( $file, $slug . '/' ) === 0 || $file === $slug . '.php' ) {
+				$plugin_file = $file;
+				break;
+			}
+		}
+
+		if ( empty( $plugin_file ) ) {
+			wp_send_json_error( [ 'message' => __( 'Plugin not installed.', 'text-domain' ) ] );
+		}
 
 		$result = activate_plugin( $plugin_file );
+
 		if ( is_wp_error( $result ) ) {
 			wp_send_json_error( [ 'message' => $result->get_error_message() ] );
 		}
 
-		wp_send_json_success( [ 'message' => __( 'Plugin activated successfully', 'text-domain' ) ] );
+		wp_send_json_success( [
+			'installed' => true,
+			'activated' => true,
+			'message'   => __( 'Plugin activated successfully.', 'text-domain' ),
+		] );
 	}
 
 	public function ajax_deactivate_plugin() {
-		check_ajax_referer( 'marketplace_nonce' );
+		check_ajax_referer( 'marketplace_nonce', 'nonce' );
 
-		if ( empty( $_REQUEST['slug'] ) ) {
-			wp_send_json_error( [ 'message' => 'Missing plugin slug' ] );
+		if ( ! current_user_can( 'activate_plugins' ) ) {
+			wp_send_json_error([ 'message' => __( 'Permission denied', 'onecom-wp' ) ]);
 		}
 
-		$slug = sanitize_text_field( $_REQUEST['slug'] );
-		$plugin_file = $slug . '/' . $slug . '.php';
+		$slug = sanitize_text_field( $_REQUEST['slug'] ?? '' );
+		if ( empty( $slug ) ) {
+			wp_send_json_error([ 'message' => __( 'Invalid plugin slug', 'onecom-wp' ) ]);
+		}
 
-		deactivate_plugins( $plugin_file );
-		wp_send_json_success( [ 'message' => __( 'Plugin deactivated successfully', 'text-domain' ) ] );
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		$plugins = get_plugins();
+
+		// Try to find the plugin main file by slug
+		$plugin_file = '';
+		foreach ( $plugins as $file => $data ) {
+			if ( strpos( $file, $slug . '/' ) === 0 || $file === $slug . '.php' ) {
+				$plugin_file = $file;
+				break;
+			}
+		}
+
+		deactivate_plugins( $plugin_file, false, is_multisite() );
+
+		if ( is_plugin_active( $plugin_file ) ) {
+			wp_send_json_error([ 'message' => __( 'Failed to deactivate plugin', 'onecom-wp' ) ]);
+		}
+
+		wp_send_json_success([
+			'message'   => __( 'Plugin deactivated successfully', 'onecom-wp' ),
+			'installed' => true,
+			'activated' => false,
+		]);
 	}
 }

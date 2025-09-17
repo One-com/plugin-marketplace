@@ -1,18 +1,35 @@
 {
   "name": "@groupone/marketplace",
   "version": "1.0.0",
-  "main": "build/index.js",
+  "description": "React-based marketplace UI module for WordPress and standalone usage.",
+  "main": "standalone/index.esm.js",
+  "module": "standalone/index.esm.js",
+  "files": [
+    "standalone",
+    "README.md"
+  ],
   "scripts": {
     "start": "wp-scripts start",
-    "build": "wp-scripts build",
+    "build": "webpack --config webpack.wp.js",
     "build:standalone": "cross-env NODE_ENV=production webpack --config webpack.standalone.js"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
   },
   "devDependencies": {
     "@wordpress/scripts": "^26.0.0",
     "cross-env": "^7.0.3",
     "webpack": "^5.0.0",
-    "webpack-cli": "^5.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
-  }
+    "webpack-cli": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:One-com/plugin-marketplace.git"
+  },
+  "author": "One.com",
+  "license": "GPL-2.0-or-later"
 }
