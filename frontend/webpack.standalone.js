@@ -1,13 +1,11 @@
 const path = require("path");
 
 module.exports = {
-	entry: "./src/index.jsx",
+	entry: "./src/index.esm.jsx",
 	output: {
-		path: path.resolve(__dirname, "standalone"),
-		filename: "index.esm.js",
-		library: { type: "module" }, // ESM build
-		globalObject: "this",
-		clean: true,
+		path: path.resolve(__dirname, 'standalone'),
+		filename: 'index.esm.js',
+		library: { type: 'module' },
 	},
 	module: {
 		rules: [
@@ -22,7 +20,7 @@ module.exports = {
 								"@babel/preset-env",
 								{
 									targets: ">0.25%, not dead", // adjust as needed
-									modules: "auto"              // 🔑 ensures import/export → require
+									modules: false
 								}
 							],
 							["@babel/preset-react", { "runtime": "automatic" }],
@@ -38,13 +36,7 @@ module.exports = {
 	externals: {
 		react: "react",       // peer dependency
 		"react-dom": "react-dom",
-		// ✅ Treat WP packages as externals
-		"@wordpress/element": "wp.element",
-		"@wordpress/components": "wp.components",
-		"@wordpress/i18n": "wp.i18n",
-		"@wordpress/hooks": "wp.hooks",
-		"@wordpress/data": "wp.data",
-		"@wordpress/block-editor": "wp.blockEditor",
+		"react-dom/client": "ReactDOM",
 		// add others as needed
 	},
 	experiments: { outputModule: true },

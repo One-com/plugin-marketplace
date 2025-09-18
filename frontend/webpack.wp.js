@@ -3,7 +3,7 @@ const path = require("path");
 
 module.exports = {
 	...defaultConfig,
-	entry: "./src/index.jsx", // ✅ correct entry
+	entry: "./src/index.wp.jsx",
 	output: {
 		path: path.resolve(__dirname, "build/"),
 		filename: "index.js",

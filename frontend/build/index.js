@@ -2,6 +2,41 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/MarketplaceApp.jsx":
+/*!********************************!*\
+  !*** ./src/MarketplaceApp.jsx ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _components_MarketPlace__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/MarketPlace */ "./src/components/MarketPlace.jsx");
+
+
+
+const MarketplaceApp = ({
+  apiBaseUrl,
+  useWPHandlers,
+  wpConfig,
+  enableDefaultStyles
+}) => {
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "marketplace-container gv-p-lg"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("h2", null, "Available Plugins"), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_MarketPlace__WEBPACK_IMPORTED_MODULE_1__["default"], {
+    apiBaseUrl: apiBaseUrl,
+    useWPHandlers: useWPHandlers,
+    wpConfig: wpConfig,
+    enableDefaultStyles: enableDefaultStyles
+  }));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (MarketplaceApp);
+
+/***/ }),
+
 /***/ "./src/components/MarketPlace.jsx":
 /*!****************************************!*\
   !*** ./src/components/MarketPlace.jsx ***!
@@ -17,7 +52,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _normalised_plugins__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./normalised-plugins */ "./src/components/normalised-plugins.jsx");
 /* harmony import */ var _PluginActions__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./PluginActions */ "./src/components/PluginActions.jsx");
 
- // WP-provided React
+
 
 
 function Marketplace({
@@ -102,7 +137,7 @@ function Marketplace({
     className: "gv-card-content"
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("h3", {
     className: "gv-card-title"
-  }, plugin.name), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, plugin.description ? plugin.description : plugin.shortDescription, " \xA0\xA0")), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_PluginActions__WEBPACK_IMPORTED_MODULE_2__["default"], {
+  }, plugin.name), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, plugin.description ? plugin.description : plugin.shortDescription, " \xA0\xA0")), useWPHandlers === true && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_PluginActions__WEBPACK_IMPORTED_MODULE_2__["default"], {
     plugin: plugin,
     pluginInAction: pluginInAction,
     onAction: handlePluginAction
@@ -276,39 +311,19 @@ module.exports = window["ReactDOM"];
 var __webpack_exports__ = {};
 // This entry needs to be wrapped in an IIFE because it needs to be isolated against other modules in the chunk.
 (() => {
-/*!***********************!*\
-  !*** ./src/index.jsx ***!
-  \***********************/
+/*!**************************!*\
+  !*** ./src/index.wp.jsx ***!
+  \**************************/
 __webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   initMarketplaceApp: () => (/* binding */ initMarketplaceApp)
-/* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom */ "react-dom");
 /* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_dom__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _components_normalised_plugins__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/normalised-plugins */ "./src/components/normalised-plugins.jsx");
-/* harmony import */ var _components_MarketPlace__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/MarketPlace */ "./src/components/MarketPlace.jsx");
+/* harmony import */ var _MarketplaceApp__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./MarketplaceApp */ "./src/MarketplaceApp.jsx");
 
 
 
 
-
-const MarketplaceApp = ({
-  apiBaseUrl,
-  useWPHandlers,
-  wpConfig,
-  enableDefaultStyles
-}) => {
-  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "marketplace-container gv-p-lg"
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("h2", null, "Available Plugins"), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_MarketPlace__WEBPACK_IMPORTED_MODULE_3__["default"], {
-    apiBaseUrl: apiBaseUrl,
-    useWPHandlers: useWPHandlers,
-    wpConfig: wpConfig,
-    enableDefaultStyles: enableDefaultStyles
-  }));
-};
 
 // Inside-WP auto-mount
 document.addEventListener("DOMContentLoaded", () => {
@@ -316,22 +331,11 @@ document.addEventListener("DOMContentLoaded", () => {
   if (el) {
     const config = window.marketplaceConfig || {};
     const root = (0,react_dom__WEBPACK_IMPORTED_MODULE_1__.createRoot)(el);
-    root.render((0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(MarketplaceApp, {
+    root.render((0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_MarketplaceApp__WEBPACK_IMPORTED_MODULE_2__["default"], {
       ...config
     }));
   }
 });
-
-// Manual init for outside-WP usage
-function initMarketplaceApp(config) {
-  const el = document.querySelector(config.selector || "#marketplace-root");
-  if (el) {
-    const root = (0,react_dom__WEBPACK_IMPORTED_MODULE_1__.createRoot)(el);
-    root.render((0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(MarketplaceApp, {
-      ...config
-    }));
-  }
-}
 })();
 
 window.MarketPlaceWP = __webpack_exports__;
