@@ -39,5 +39,8 @@
     "url": "git@github.com:One-com/plugin-marketplace.git"
   },
   "author": "One.com",
-  "license": "GPL-2.0-or-later"
+  "license": "GPL-2.0-or-later",
+  "dependencies": {
+    "react-i18next": "^15.7.3"
+  }
 }

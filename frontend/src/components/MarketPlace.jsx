@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
 import {normalizePlugins} from "./normalised-plugins";
 import PluginActions from "./PluginActions";
+import "@group.one/gravity";
+import { useTranslation } from "react-i18next";
 
-export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enableDefaultStyles }) {
+export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enableDefaultStyles, assetsBaseUrl }) {
     const [plugins, setPlugins] = useState([]);
     const [loading, setLoading] = useState(true);
     const [pluginInAction, setPluginInAction] = useState({});
+    const {t} = useTranslation();
 
     useEffect(() => {
+
         async function fetchPlugins() {
             try {
                 const res = await fetch(`${apiBaseUrl}`);
@@ -35,7 +39,7 @@ export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enabl
 
             if (useWPHandlers) {
                 // original WP-AJAX URL + download_url appended
-                url = `${wpConfig.ajax_url}?action=marketplace_${action}_plugin&_wpnonce=${wpConfig.nonce}&slug=${plugin.slug}&${downloadParam}`;
+                url = `${wpConfig.ajax_url}?action=marketplace_${action}_plugin&_wpnonce=${wpConfig.nonce}&nonce=${wpConfig.nonce}&slug=${plugin.slug}&${downloadParam}`;
             } else {
                 // append download_url to non-WP URL (adds ? or & correctly)
                 url = url + (url.includes('?') ? '&' : '?') + downloadParam;
@@ -64,28 +68,54 @@ export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enabl
 
     if (loading) return <p>Loading plugins...</p>;
 
-    return (
-        <div className="marketplace gv-grid gv-gap-lg gv-tab-grid-cols-1 gv-desk-grid-cols-2 gv-mt-md">
-            {plugins.map(plugin => (
-                <div id={`plugin-${plugin.slug}`} className="gv-card oc-plugins-box gv-surface-bright gv-pb-lg">
-                    <div className="gv-card-illustration">
-                        <img className="gv-tile" src={plugin.thumbnail} alt={plugin.name} width="72"
-                             height="72"/>
-                    </div>
-                    <div key={plugin.slug} className='gv-card-content'>
+    // Group plugins by a single, specific category (first category), avoid duplicates across headings
+    const categoryMap = new Map();
 
-                        <h3 className="gv-card-title">{plugin.name}</h3>
-                        <p>{plugin.description ? plugin.description : plugin.shortDescription} &nbsp;&nbsp;
-                        </p>
+    // Deduplicate plugins by slug first (in case backend/normalizer still returns duplicates)
+    const bySlug = new Map();
+    plugins.forEach((p) => {
+        if (!bySlug.has(p.slug)) bySlug.set(p.slug, p);
+    });
+
+    Array.from(bySlug.values()).forEach((p) => {
+        const primary = Array.isArray(p.categories) && p.categories.length ? String(p.categories[0]) : "Others";
+        if (!categoryMap.has(primary)) categoryMap.set(primary, []);
+        categoryMap.get(primary).push(p);
+    });
+
+    const categories = Array.from(categoryMap.entries());
+
+    return (
+        <div className="marketplace-container gv-flex gv-flex-col gv-flex-wrap gv-gap-lg gv-mt-fluid">
+            {categories.map(([cat, list]) => (
+                <section key={cat} className="">
+                    <h2 className="gv-heading-md gv-mb-sm">{cat}</h2>
+                    <div className="gv-grid gv-gap-lg gv-tab-grid-cols-1 gv-desk-grid-cols-2">
+                        {list.map((plugin) => (
+                            <a href="#" key={plugin.slug} className="gv-shortcut-tile gv-surface-bright">
+                                <gv-tile aria-hidden="true" src={`${assetsBaseUrl || (window.marketplaceConfig && window.marketplaceConfig.assetsBaseUrl) || ''}assets/icons/placeholder.svg`}></gv-tile>
+                                <div className="gv-content">
+                                    <h3 className="gv-title">{plugin.name}</h3>
+                                        <p>{plugin.description ? plugin.description : plugin.shortDescription}</p>
+                                        <div className="gv-price">
+                                            <span className="gv-price-prefix">{t("migratorMail_hi")}</span>
+                                            <span className="gv-price-text">{plugin.priceCurrency} {plugin.priceAmount}</span>
+                                            <span className="gv-period">/mo</span>
+                                        </div></div>
+                                        <gv-icon aria-hidden="true" src={`${assetsBaseUrl || (window.marketplaceConfig && window.marketplaceConfig.assetsBaseUrl) || ''}assets/icons/arrow_forward.svg`}></gv-icon>
+
+
+                                {useWPHandlers === true && (
+                                    <PluginActions
+                                        plugin={plugin}
+                                        pluginInAction={pluginInAction}
+                                        onAction={handlePluginAction}
+                                    />
+                                )}
+                            </a>
+                        ))}
                     </div>
-                    {useWPHandlers === true &&
-                    <PluginActions
-                        plugin={plugin}
-                        pluginInAction={pluginInAction}
-                        onAction={handlePluginAction}
-                    />
-                    }
-                </div>
+                </section>
             ))}
         </div>
     );

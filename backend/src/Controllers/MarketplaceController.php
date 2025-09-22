@@ -89,12 +89,14 @@ class MarketplaceController {
 		wp_localize_script( 'marketplace-frontend', 'marketplaceConfig', [
 			'apiBaseUrl' => trailingslashit( rest_url( 'marketplace/v1/plugins' ) ),
 			'apiUrl'     => $this->config['api_url'],
+			'locale' => get_locale(),
 			'useWPHandlers' => true,
 			'wpConfig' => [
 				'ajax_url' => admin_url( 'admin-ajax.php' ),
 				'nonce'    => wp_create_nonce( 'marketplace_nonce' ),
 			],
 			'enableDefaultStyles' => empty( $this->config['custom_css'] ),
+			'assetsBaseUrl' => $base_url,
 			'labels'=>array(
 				'install' => __('Install', OC_PLUGIN_DOMAIN),
 				'installing' => __('Installing', OC_PLUGIN_DOMAIN),
@@ -128,13 +130,38 @@ class MarketplaceController {
 			return new WP_REST_Response( [ 'error' => $plugins->get_error_message() ], 500 );
 		}
 
-		// Attach WP state (installed/activated)
-		$plugins['data']['ui_json'] = array_map( function( $plugin ) {
+		// Attach WP state (installed/activated) for both legacy and new shapes
+		$add_state = function( $plugin ) {
+			if ( empty( $plugin['slug'] ) ) {
+				return $plugin;
+			}
 			$plugin_file = $plugin['slug'] . '/' . $plugin['slug'] . '.php';
-			$plugin['installed'] = file_exists(WP_PLUGIN_DIR . '/' . $plugin['slug']);
-			$plugin['activated'] = is_plugin_active($plugin_file);
+			$plugin['installed'] = file_exists( WP_PLUGIN_DIR . '/' . $plugin['slug'] );
+			$plugin['activated'] = function_exists('is_plugin_active') ? is_plugin_active( $plugin_file ) : false;
 			return $plugin;
-		}, $plugins['data']['ui_json'] );
+		};
+
+		// Handle supported shapes in order of preference:
+		// 1) data.sections[].items[] (new shared response)
+		// 2) sections[].items[] (alternate shape)
+		// 3) data.ui_json (legacy)
+		if ( ! empty( $plugins['data']['sections'] ) && is_array( $plugins['data']['sections'] ) ) {
+			foreach ( $plugins['data']['sections'] as $si => $section ) {
+				if ( empty( $section['items'] ) || ! is_array( $section['items'] ) ) {
+					continue;
+				}
+				$plugins['data']['sections'][$si]['items'] = array_map( $add_state, $section['items'] );
+			}
+		} elseif ( ! empty( $plugins['sections'] ) && is_array( $plugins['sections'] ) ) {
+			foreach ( $plugins['sections'] as $si => $section ) {
+				if ( empty( $section['items'] ) || ! is_array( $section['items'] ) ) {
+					continue;
+				}
+				$plugins['sections'][$si]['items'] = array_map( $add_state, $section['items'] );
+			}
+		} elseif ( ! empty( $plugins['data']['ui_json'] ) && is_array( $plugins['data']['ui_json'] ) ) {
+			$plugins['data']['ui_json'] = array_map( $add_state, $plugins['data']['ui_json'] );
+		}
 
 		return new WP_REST_Response( $plugins, 200 );
 	}
