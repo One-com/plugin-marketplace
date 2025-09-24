@@ -5,4 +5,6 @@
 /frontend/package-lock.json      export-ignore
 /frontend/vite.config.js      export-ignore
 /frontend/webpack.wp.js      export-ignore
+/frontend/build/index.asset.php      export-ignore
+readme.md                           export-ignore
 /.gitignore                     export-ignore
