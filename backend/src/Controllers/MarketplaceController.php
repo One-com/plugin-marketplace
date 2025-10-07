@@ -60,49 +60,53 @@ class MarketplaceController {
 	}
 
 	public function render_admin_page() {
-		// Resolve assets base path dynamically so it works in different install layouts
-		$here = __DIR__;
+		// Resolve assets base path in a simple, robust way
+		$prefixed_base = dirname(__DIR__);              // Controllers' parent in prefixed tree
+		$package_root  = dirname(__DIR__, 3);           // Package root in source/vendor layout
 
-		// Candidate directories where frontend/ and assets/ may live relative to this controller
 		$candidates = [
-			// Mozart-prefixed flattened tree: .../Vendor/Onecom/Marketplace/Controllers -> ../frontend
-			realpath($here . '/../') ?: ($here . '/../'),
-			// Packaged-source tree: .../backend/src/Controllers -> ../../ (module or package root)
-			realpath(dirname($here, 2) . '/../') ?: (dirname($here, 2) . '/../'),
-			// Monorepo module root (defensive): .../modules/plugin-marketplace
-			realpath(dirname($here, 3)) ?: dirname($here, 3),
+			$prefixed_base,
+			$package_root,
 		];
 
 		$assets_base_path = '';
 		foreach ($candidates as $cand) {
-			if (! $cand) { continue; }
-			// Check for the presence of the built JS file
-			if (file_exists(trailingslashit($cand) . 'frontend/build/index.js')) {
+			if ($cand && file_exists(trailingslashit($cand) . 'frontend/build/index.js')) {
 				$assets_base_path = trailingslashit($cand);
 				break;
 			}
 		}
-
-		// Fallback: use current dir's parent just in case
-		if (!$assets_base_path) {
-			$assets_base_path = trailingslashit($here) . '../';
+		if ($assets_base_path === '') {
+			$assets_base_path = trailingslashit($prefixed_base);
 		}
 
-		// Derive plugin root path + URL, then compute URL relative to it.
-		$plugin_root_path = trailingslashit(plugin_dir_path(__FILE__));
-		$plugin_root_url  = trailingslashit(plugin_dir_url(__FILE__));
+		// Determine plugin root from WP_PLUGIN_DIR and build URL relative to it
+		$abs_dir     = wp_normalize_path(__DIR__);
+		$plugins_dir = rtrim(wp_normalize_path(WP_PLUGIN_DIR), '/') . '/';
+		$plugin_root_path = '';
+		$plugin_root_url  = '';
 
-		$rel_from_plugin = ltrim(str_replace(['\\','/'], '/', str_replace(['\\','/'], '/', $assets_base_path)),'/');
-		$plugin_root_norm = ltrim(str_replace(['\\','/'], '/', $plugin_root_path), '/');
-		if (strpos($rel_from_plugin, $plugin_root_norm) === 0) {
-			$rel_from_plugin = ltrim(substr($rel_from_plugin, strlen($plugin_root_norm)), '/');
-		} else {
-			// Compute relative by stripping plugin root path from assets base path
-			$rel_from_plugin = ltrim(str_replace($plugin_root_path, '', $assets_base_path), '/');
+		if (strpos($abs_dir, $plugins_dir) === 0) {
+			$after = substr($abs_dir, strlen($plugins_dir));
+			$slug  = strtok($after, '/');
+			if ($slug) {
+				$plugin_root_path = trailingslashit(WP_PLUGIN_DIR . '/' . $slug);
+				$plugin_root_url  = trailingslashit(content_url('plugins/' . $slug));
+			}
+		}
+		if ($plugin_root_path === '' || $plugin_root_url === '') {
+			// Best-effort fallback
+			$plugin_root_path = trailingslashit(dirname(__DIR__, 4));
+			$plugin_root_url  = trailingslashit(plugins_url('', dirname(__DIR__, 4) . '/index.php'));
 		}
 
+		$base_path = trailingslashit($assets_base_path);
+		$rel_from_plugin = ltrim(str_replace(
+			wp_normalize_path($plugin_root_path),
+			'',
+			wp_normalize_path($base_path)
+		), '/');
 		$base_url = trailingslashit($plugin_root_url . $rel_from_plugin);
-		$base_path = $assets_base_path;
 
 		// Enqueue JS dynamically
 		$js_file   = 'frontend/build/index.js';
