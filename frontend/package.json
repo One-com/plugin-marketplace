@@ -1,6 +1,6 @@
 {
   "name": "wp-marketplace",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.3",
   "description": "React-based wp plugins marketplace module.",
   "main": "standalone/index.es.js",
   "module": "standalone/index.es.js",
@@ -36,7 +36,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/One-com/plugin-marketplace.git"
+    "url": "git+ssh://git@github.com:One-com/wp-marketplace.git"
   },
   "author": "One.com",
   "license": "GPL-2.0-or-later",
