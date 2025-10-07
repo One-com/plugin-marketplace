@@ -60,11 +60,51 @@ class MarketplaceController {
 	}
 
 	public function render_admin_page() {
-		// ✅ Get base path and URL for this module once
-		$base_path = plugin_dir_path( dirname( __DIR__, 2 ) ); // one level up from backend/
-		$base_url  = plugin_dir_url( dirname( __DIR__, 2 ) );
+		// Resolve assets base path dynamically so it works in different install layouts
+		$here = __DIR__;
 
-		// ✅ Enqueue JS dynamically
+		// Candidate directories where frontend/ and assets/ may live relative to this controller
+		$candidates = [
+			// Mozart-prefixed flattened tree: .../Vendor/Onecom/Marketplace/Controllers -> ../frontend
+			realpath($here . '/../') ?: ($here . '/../'),
+			// Packaged-source tree: .../backend/src/Controllers -> ../../ (module or package root)
+			realpath(dirname($here, 2) . '/../') ?: (dirname($here, 2) . '/../'),
+			// Monorepo module root (defensive): .../modules/plugin-marketplace
+			realpath(dirname($here, 3)) ?: dirname($here, 3),
+		];
+
+		$assets_base_path = '';
+		foreach ($candidates as $cand) {
+			if (! $cand) { continue; }
+			// Check for the presence of the built JS file
+			if (file_exists(trailingslashit($cand) . 'frontend/build/index.js')) {
+				$assets_base_path = trailingslashit($cand);
+				break;
+			}
+		}
+
+		// Fallback: use current dir's parent just in case
+		if (!$assets_base_path) {
+			$assets_base_path = trailingslashit($here) . '../';
+		}
+
+		// Derive plugin root path + URL, then compute URL relative to it.
+		$plugin_root_path = trailingslashit(plugin_dir_path(__FILE__));
+		$plugin_root_url  = trailingslashit(plugin_dir_url(__FILE__));
+
+		$rel_from_plugin = ltrim(str_replace(['\\','/'], '/', str_replace(['\\','/'], '/', $assets_base_path)),'/');
+		$plugin_root_norm = ltrim(str_replace(['\\','/'], '/', $plugin_root_path), '/');
+		if (strpos($rel_from_plugin, $plugin_root_norm) === 0) {
+			$rel_from_plugin = ltrim(substr($rel_from_plugin, strlen($plugin_root_norm)), '/');
+		} else {
+			// Compute relative by stripping plugin root path from assets base path
+			$rel_from_plugin = ltrim(str_replace($plugin_root_path, '', $assets_base_path), '/');
+		}
+
+		$base_url = trailingslashit($plugin_root_url . $rel_from_plugin);
+		$base_path = $assets_base_path;
+
+		// Enqueue JS dynamically
 		$js_file   = 'frontend/build/index.js';
 		$js_path   = $base_path . $js_file;
 		$js_url    = $base_url . $js_file;
@@ -77,7 +117,7 @@ class MarketplaceController {
 			true
 		);
 
-		// ✅ Enqueue CSS dynamically (custom or default)
+		// Enqueue CSS dynamically (custom or default)
 		if ( ! empty( $this->config['custom_css'] ) ) {
 			wp_enqueue_style( 'marketplace-css', esc_url( $this->config['custom_css'] ), [], '1.0.0' );
 		} else {
@@ -85,7 +125,7 @@ class MarketplaceController {
 			wp_enqueue_style( 'marketplace-css', $base_url . $css_file, [], '1.0.0' );
 		}
 
-		// ✅ Localize JS with config
+		// Localize JS with config
 		wp_localize_script( 'marketplace-frontend', 'marketplaceConfig', [
 			'apiBaseUrl' => trailingslashit( rest_url( 'marketplace/v1/plugins' ) ),
 			'apiUrl'     => $this->config['api_url'],
