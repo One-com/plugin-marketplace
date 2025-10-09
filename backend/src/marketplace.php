@@ -1,6 +1,6 @@
 <?php
-namespace Onecom\Marketplace;
-use Onecom\Marketplace\Controllers\MarketplaceController;
+namespace Groupone\Marketplace;
+use Groupone\Marketplace\Controllers\MarketplaceController;
 
 /**
  * Market Place Embeddable Module

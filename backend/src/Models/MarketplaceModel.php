@@ -1,5 +1,5 @@
 <?php
-namespace Onecom\Marketplace\Models;
+namespace Groupone\Marketplace\Models;
 
 /**
  * Handles fetching data from external API.

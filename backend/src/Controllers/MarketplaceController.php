@@ -1,7 +1,7 @@
 <?php
-namespace Onecom\Marketplace\Controllers;
+namespace Groupone\Marketplace\Controllers;
 
-use Onecom\Marketplace\Models\MarketplaceModel;
+use Groupone\Marketplace\Models\MarketplaceModel;
 
 use WP_REST_Response;
 class MarketplaceController {
