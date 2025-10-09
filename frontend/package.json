@@ -1,6 +1,6 @@
 {
   "name": "wp-marketplace",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "description": "React-based wp plugins marketplace module.",
   "main": "standalone/index.es.js",
   "module": "standalone/index.es.js",
