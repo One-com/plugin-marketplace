@@ -7,6 +7,8 @@ use WP_REST_Response;
 class MarketplaceController {
 	protected $config;
 	protected $model;
+	protected $assets_base_path;
+	protected $assets_base_url;
 
 	/**
 	 * Create + initialize controller instance.
@@ -29,9 +31,106 @@ class MarketplaceController {
 			'api_url'          => '', // default to empty, React can decide
 			'css_url'          => '', // ✅ optional
 			'css_handle'       => 'marketplace-frontend-style',
+			'assets_path'      => '', // ✅ Optional: explicit path to package root containing frontend/ directory
 		] );
 
 		$this->model = new MarketplaceModel( $this->config['api_url'] );
+
+		// Resolve assets path once during construction
+		$this->resolve_assets_paths();
+	}
+
+	/**
+	 * Resolve and validate assets paths.
+	 * Priority: 1) Explicit config, 2) Auto-detect via composer.json
+	 */
+	protected function resolve_assets_paths() {
+		$package_root = '';
+
+		// Option 1: Use explicitly provided assets_path
+		if ( ! empty( $this->config['assets_path'] ) ) {
+			$package_root = wp_normalize_path( $this->config['assets_path'] );
+		}
+
+		// Option 2: Auto-detect using composer.json as anchor
+		if ( empty( $package_root ) ) {
+			$package_root = $this->find_package_root_via_composer();
+		}
+
+		// Validate that frontend assets actually exist
+		$package_root = trailingslashit( $package_root );
+		$frontend_js = $package_root . 'frontend/build/index.js';
+
+		if ( ! file_exists( $frontend_js ) ) {
+			// Last resort: use current directory (will likely fail but won't crash)
+			$package_root = trailingslashit( dirname( __DIR__ ) );
+		}
+
+		$this->assets_base_path = $package_root;
+		$this->assets_base_url  = $this->convert_path_to_url( $package_root );
+	}
+
+	/**
+	 * Find package root by looking for composer.json
+	 * Works for both Mozart-prefixed and regular vendor installations
+	 *
+	 * @return string Package root path or empty string
+	 */
+	protected function find_package_root_via_composer() {
+		$current_dir = wp_normalize_path( __DIR__ );
+		$max_depth = 10; // Safety limit
+
+		for ( $i = 0; $i < $max_depth; $i++ ) {
+			$composer_path = trailingslashit( $current_dir ) . 'composer.json';
+
+			if ( file_exists( $composer_path ) ) {
+				// Verify this is our package by checking the name
+				$composer_data = json_decode( file_get_contents( $composer_path ), true );
+
+				if ( isset( $composer_data['name'] ) && $composer_data['name'] === 'groupone/marketplace' ) {
+					return $current_dir;
+				}
+			}
+
+			// Move up one directory
+			$parent_dir = dirname( $current_dir );
+
+			// Stop if we've reached the filesystem root
+			if ( $parent_dir === $current_dir ) {
+				break;
+			}
+
+			$current_dir = $parent_dir;
+		}
+
+		return '';
+	}
+
+	/**
+	 * Convert filesystem path to URL
+	 *
+	 * @param string $path Absolute filesystem path
+	 * @return string URL
+	 */
+	protected function convert_path_to_url( $path ) {
+		$path = wp_normalize_path( $path );
+		$plugins_dir = wp_normalize_path( WP_PLUGIN_DIR );
+
+		// Check if path is within plugins directory
+		if ( strpos( $path, $plugins_dir ) === 0 ) {
+			$relative = ltrim( str_replace( $plugins_dir, '', $path ), '/' );
+			return trailingslashit( plugins_url( $relative ) );
+		}
+
+		// Fallback: try content directory
+		$content_dir = wp_normalize_path( WP_CONTENT_DIR );
+		if ( strpos( $path, $content_dir ) === 0 ) {
+			$relative = ltrim( str_replace( $content_dir, '', $path ), '/' );
+			return trailingslashit( content_url( $relative ) );
+		}
+
+		// Last resort: return plugins URL with the full path (likely incorrect but won't crash)
+		return trailingslashit( plugins_url() );
 	}
 
 	/**
@@ -60,53 +159,9 @@ class MarketplaceController {
 	}
 
 	public function render_admin_page() {
-		// Resolve assets base path in a simple, robust way
-		$prefixed_base = dirname(__DIR__);              // Controllers' parent in prefixed tree
-		$package_root  = dirname(__DIR__, 3);           // Package root in source/vendor layout
-
-		$candidates = [
-			$prefixed_base,
-			$package_root,
-		];
-
-		$assets_base_path = '';
-		foreach ($candidates as $cand) {
-			if ($cand && file_exists(trailingslashit($cand) . 'frontend/build/index.js')) {
-				$assets_base_path = trailingslashit($cand);
-				break;
-			}
-		}
-		if ($assets_base_path === '') {
-			$assets_base_path = trailingslashit($prefixed_base);
-		}
-
-		// Determine plugin root from WP_PLUGIN_DIR and build URL relative to it
-		$abs_dir     = wp_normalize_path(__DIR__);
-		$plugins_dir = rtrim(wp_normalize_path(WP_PLUGIN_DIR), '/') . '/';
-		$plugin_root_path = '';
-		$plugin_root_url  = '';
-
-		if (strpos($abs_dir, $plugins_dir) === 0) {
-			$after = substr($abs_dir, strlen($plugins_dir));
-			$slug  = strtok($after, '/');
-			if ($slug) {
-				$plugin_root_path = trailingslashit(WP_PLUGIN_DIR . '/' . $slug);
-				$plugin_root_url  = trailingslashit(content_url('plugins/' . $slug));
-			}
-		}
-		if ($plugin_root_path === '' || $plugin_root_url === '') {
-			// Best-effort fallback
-			$plugin_root_path = trailingslashit(dirname(__DIR__, 4));
-			$plugin_root_url  = trailingslashit(plugins_url('', dirname(__DIR__, 4) . '/index.php'));
-		}
-
-		$base_path = trailingslashit($assets_base_path);
-		$rel_from_plugin = ltrim(str_replace(
-			wp_normalize_path($plugin_root_path),
-			'',
-			wp_normalize_path($base_path)
-		), '/');
-		$base_url = trailingslashit($plugin_root_url . $rel_from_plugin);
+		// Use pre-resolved paths from constructor
+		$base_path = $this->assets_base_path;
+		$base_url  = $this->assets_base_url;
 
 		// Enqueue JS dynamically
 		$js_file   = 'frontend/build/index.js';
