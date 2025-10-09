@@ -26,6 +26,7 @@ Step-by-step
 
 Example of a complete composer.json (minimal):
 
+```json
 {
 "name": "your-vendor/your-plugin",
 "type": "wordpress-plugin",
@@ -72,13 +73,17 @@ Example of a complete composer.json (minimal):
 ]
 }
 }
+```
 
 2) Run Mozart to prefix and copy assets into your plugin
 
+```bash
 composer install
+```
 
 3) Bootstrap the module in your plugin code
 
+```php
 require_once __DIR__ . '/vendor-prefixed/autoload.php';
 
 // using Mozart-prefixed classes
@@ -91,6 +96,7 @@ require_once __DIR__ . '/vendor-prefixed/autoload.php';
 // Optional: Explicitly set assets path if auto-detection doesn't work
 // 'assets_path'      => __DIR__ . '/vendor-prefixed/Groupone/Marketplace/',
 ]);
+```
 
 ---
 
@@ -111,9 +117,11 @@ require_once __DIR__ . '/vendor-prefixed/autoload.php';
 
 - Explicit: Pass assets_path in the config. Example:
 
+```php
 \Groupone\Marketplace\Marketplace::run([
   'assets_path' => WP_PLUGIN_DIR . '/your-plugin/vendor-prefixed/'
 ]);
+```
 
 
 ---
