@@ -28,50 +28,50 @@ Example of a complete composer.json (minimal):
 
 ```json
 {
-"name": "your-vendor/your-plugin",
-"type": "wordpress-plugin",
-"require": {
-"php": ">=8.0",
-"groupone/marketplace": "^1.0"
-},
-"repositories": [
-{ "type": "vcs", "url": "git@gitlab.group.one:wp-in/marketplace.git" }
-],
-"require-dev": {
-"coenjacobs/mozart": "^0.7"
-},
-"autoload": {
-"psr-4": {
-"YourVendor\\YourPlugin\\": "src/"
-}
-},
-"extra": {
-"mozart": {
-"dep_namespace": "YourPlugin\\Vendor\\",
-"dep_directory": "/vendor-prefixed/",
-"classmap_directory": "/vendor-prefixed/",
-"packages": [
-"groupone/marketplace"
-],
-"delete_vendor_directories": false
-}
-},
-"scripts": {
-"post-install-cmd": [
-"php vendor/bin/mozart compose",
-"rsync -a vendor/groupone/marketplace/frontend/build/ vendor-prefixed/Groupone/Marketplace/frontend/build/ || true",
-"rsync -a vendor/groupone/marketplace/assets/css/ vendor-prefixed/Groupone/Marketplace/assets/css/ || true",
-"rsync -a vendor/groupone/marketplace/assets/fonts/ vendor-prefixed/Groupone/Marketplace/assets/fonts/ || true",
-"composer dump-autoload -o"
-],
-"post-update-cmd": [
-"php vendor/bin/mozart compose",
-"rsync -a vendor/groupone/marketplace/frontend/build/ vendor-prefixed/Groupone/Marketplace/frontend/build/ || true",
-"rsync -a vendor/groupone/marketplace/assets/css/ vendor-prefixed/Groupone/Marketplace/assets/css/ || true",
-"rsync -a vendor/groupone/marketplace/assets/fonts/ vendor-prefixed/Groupone/Marketplace/assets/fonts/ || true",
-"composer dump-autoload -o"
-]
-}
+  "name": "your-vendor/your-plugin",
+  "type": "wordpress-plugin",
+  "require": {
+    "php": ">=8.0",
+    "groupone/marketplace": "^1.0"
+  },
+  "repositories": [
+    { "type": "vcs", "url": "git@gitlab.group.one:wp-in/marketplace.git" }
+  ],
+  "require-dev": {
+    "coenjacobs/mozart": "^0.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "YourVendor\\YourPlugin\\": "src/"
+    }
+  },
+  "extra": {
+    "mozart": {
+      "dep_namespace": "YourPlugin\\Vendor\\",
+      "dep_directory": "/vendor-prefixed/",
+      "classmap_directory": "/vendor-prefixed/",
+      "packages": [
+        "groupone/marketplace"
+      ],
+      "delete_vendor_directories": false
+    }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "php vendor/bin/mozart compose",
+      "rsync -a vendor/groupone/marketplace/frontend/build/ vendor-prefixed/Groupone/Marketplace/frontend/build/ || true",
+      "rsync -a vendor/groupone/marketplace/assets/css/ vendor-prefixed/Groupone/Marketplace/assets/css/ || true",
+      "rsync -a vendor/groupone/marketplace/assets/fonts/ vendor-prefixed/Groupone/Marketplace/assets/fonts/ || true",
+      "composer dump-autoload -o"
+    ],
+    "post-update-cmd": [
+      "php vendor/bin/mozart compose",
+      "rsync -a vendor/groupone/marketplace/frontend/build/ vendor-prefixed/Groupone/Marketplace/frontend/build/ || true",
+      "rsync -a vendor/groupone/marketplace/assets/css/ vendor-prefixed/Groupone/Marketplace/assets/css/ || true",
+      "rsync -a vendor/groupone/marketplace/assets/fonts/ vendor-prefixed/Groupone/Marketplace/assets/fonts/ || true",
+      "composer dump-autoload -o"
+    ]
+  }
 }
 ```
 
