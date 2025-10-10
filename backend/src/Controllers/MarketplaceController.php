@@ -29,15 +29,36 @@ class MarketplaceController {
 			'menu_title'       => __( 'Marketplace', 'text-domain' ),
 			'menu_slug'        => 'plugin-marketplace',
 			'api_url'          => '', // default to empty, React can decide
-			'css_url'          => '', // ✅ optional
+			'css_url'          => '', //  optional
 			'css_handle'       => 'marketplace-frontend-style',
-			'assets_path'      => '', // ✅ Optional: explicit path to package root containing frontend/ directory
+			'assets_path'      => '', //  Optional: explicit path to package root containing frontend/ directory
 		] );
 
-		$this->model = new MarketplaceModel( $this->config['api_url'] );
+		// Defer model and asset initialization until needed (optimization for multi-plugin installs)
+		$this->model = null;
+		$this->assets_base_path = null;
+		$this->assets_base_url = null;
+	}
 
-		// Resolve assets path once during construction
-		$this->resolve_assets_paths();
+	/**
+	 * Lazy-load model instance (optimization for multi-plugin installs).
+	 * Only instantiated when actually needed (REST endpoint or page render).
+	 */
+	protected function get_model() {
+		if ( $this->model === null ) {
+			$this->model = new MarketplaceModel( $this->config['api_url'] );
+		}
+		return $this->model;
+	}
+
+	/**
+	 * Lazy-load asset paths (optimization for multi-plugin installs).
+	 * Only resolved when the marketplace page is being rendered.
+	 */
+	protected function ensure_assets_resolved() {
+		if ( $this->assets_base_path === null || $this->assets_base_url === null ) {
+			$this->resolve_assets_paths();
+		}
 	}
 
 	/**
@@ -159,7 +180,9 @@ class MarketplaceController {
 	}
 
 	public function render_admin_page() {
-		// Use pre-resolved paths from constructor
+		// Lazy-load assets only when this page is actually rendered (optimization)
+		$this->ensure_assets_resolved();
+
 		$base_path = $this->assets_base_path;
 		$base_url  = $this->assets_base_url;
 
@@ -223,7 +246,8 @@ class MarketplaceController {
 	}
 
 	public function get_plugins( $request ) {
-		$plugins = $this->model->fetch_plugins();
+		// Lazy-load model only when REST endpoint is called (optimization)
+		$plugins = $this->get_model()->fetch_plugins();
 
 		if ( is_wp_error( $plugins ) ) {
 			return new WP_REST_Response( [ 'error' => $plugins->get_error_message() ], 500 );
@@ -286,7 +310,7 @@ class MarketplaceController {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
 		$upgrader = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
-		$result   = $upgrader->install( $download_url ); // ✅ use URL from React
+		$result   = $upgrader->install( $download_url ); //  use URL from React
 
 		if ( is_wp_error( $result ) ) {
 			wp_send_json_error( [ 'message' => $result->get_error_message() ] );
