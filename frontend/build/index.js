@@ -3706,7 +3706,8 @@ function Marketplace({
   }, list.map(plugin => (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("a", {
     href: "#",
     key: plugin.slug,
-    className: "gv-shortcut-tile gv-surface-bright"
+    className: "gv-shortcut-tile gv-surface-bright",
+    onClick: e => e.preventDefault()
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("gv-tile", {
     "aria-hidden": "true",
     src: `${assetsBaseUrl || window.marketplaceConfig && window.marketplaceConfig.assetsBaseUrl || ''}assets/icons/placeholder.svg`
@@ -3725,11 +3726,18 @@ function Marketplace({
   }, "/mo"))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("gv-icon", {
     "aria-hidden": "true",
     src: `${assetsBaseUrl || window.marketplaceConfig && window.marketplaceConfig.assetsBaseUrl || ''}assets/icons/arrow_forward.svg`
-  }), useWPHandlers === true && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_PluginActions__WEBPACK_IMPORTED_MODULE_2__["default"], {
+  }), useWPHandlers ? (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_PluginActions__WEBPACK_IMPORTED_MODULE_2__["default"], {
     plugin: plugin,
     pluginInAction: pluginInAction,
     onAction: handlePluginAction
-  })))))));
+  }) : plugin.download && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "plugin-actions gv-card-content gv-flex gv-gap-sm gv-mt-md"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("a", {
+    href: plugin.download,
+    download: true,
+    className: "gv-button gv-button-secondary",
+    onClick: e => e.stopPropagation()
+  }, marketplaceConfig?.labels?.download || 'Download'))))))));
 }
 
 /***/ }),
@@ -4172,6 +4180,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 })();
 
+window.MarketPlaceWP = __webpack_exports__;
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map

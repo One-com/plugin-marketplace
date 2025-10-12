@@ -92,7 +92,7 @@ export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enabl
                     <h2 className="gv-heading-md gv-mb-sm">{cat}</h2>
                     <div className="gv-grid gv-gap-lg gv-tab-grid-cols-1 gv-desk-grid-cols-2">
                         {list.map((plugin) => (
-                            <a href="#" key={plugin.slug} className="gv-shortcut-tile gv-surface-bright">
+                            <a href="#" key={plugin.slug} className="gv-shortcut-tile gv-surface-bright" onClick={(e) => e.preventDefault()}>
                                 <gv-tile aria-hidden="true" src={`${assetsBaseUrl || (window.marketplaceConfig && window.marketplaceConfig.assetsBaseUrl) || ''}assets/icons/placeholder.svg`}></gv-tile>
                                 <div className="gv-content">
                                     <h3 className="gv-title">{plugin.name}</h3>
@@ -105,12 +105,25 @@ export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enabl
                                         <gv-icon aria-hidden="true" src={`${assetsBaseUrl || (window.marketplaceConfig && window.marketplaceConfig.assetsBaseUrl) || ''}assets/icons/arrow_forward.svg`}></gv-icon>
 
 
-                                {useWPHandlers === true && (
+                                {useWPHandlers ? (
                                     <PluginActions
                                         plugin={plugin}
                                         pluginInAction={pluginInAction}
                                         onAction={handlePluginAction}
                                     />
+                                ) : (
+                                    plugin.download && (
+                                        <div className="plugin-actions gv-card-content gv-flex gv-gap-sm gv-mt-md">
+                                            <a
+                                                href={plugin.download}
+                                                download
+                                                className="gv-button gv-button-secondary"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                {marketplaceConfig?.labels?.download || 'Download'}
+                                            </a>
+                                        </div>
+                                    )
                                 )}
                             </a>
                         ))}
