@@ -43,17 +43,17 @@ Example of a complete composer.json (minimal):
   "autoload": {
     "psr-4": {
       "YourVendor\\YourPlugin\\": "src/",
-      "YourPlugin\\Vendor\\": "vendor-prefixed/"
+      "YourPlugin\\Vendor\\": "inc/Dependencies/"
     },
     "classmap": [
-      "vendor-prefixed/YourPlugin/Vendor/"
+      "inc/Dependencies/YourPlugin/"
     ]
   },
   "extra": {
     "mozart": {
       "dep_namespace": "YourPlugin\\Vendor\\",
-      "dep_directory": "/vendor-prefixed/",
-      "classmap_directory": "/vendor-prefixed/",
+      "dep_directory": "/inc/Dependencies/YourPlugin/",
+      "classmap_directory": "/inc/Dependencies/YourPlugin/",
       "packages": [
         "groupone/marketplace"
       ],
@@ -75,11 +75,10 @@ Example of a complete composer.json (minimal):
       "[ -f vendor/bin/mozart ] && php vendor/bin/mozart compose || echo 'Mozart not found, skipping...'"
     ],
     "copy-assets": [
-      "mkdir -p vendor-prefixed/YourPlugin/Vendor/Groupone/Marketplace/frontend",
-      "mkdir -p vendor-prefixed/YourPlugin/Vendor/Groupone/Marketplace/assets",
-      "[ -d vendor/groupone/marketplace/frontend ] && rsync -a vendor/groupone/marketplace/frontend/ vendor-prefixed/YourPlugin/Vendor/Groupone/Marketplace/frontend/ || true",
-      "[ -d vendor/groupone/marketplace/assets ] && rsync -a vendor/groupone/marketplace/assets/ vendor-prefixed/YourPlugin/Vendor/Groupone/Marketplace/assets/ || true",
-      "[ -d vendor-prefixed/Groupone ] && rm -rf vendor-prefixed/Groupone || true"
+      "mkdir -p inc/Dependencies/YourPlugin/Groupone/Marketplace/frontend",
+      "mkdir -p inc/Dependencies/YourPlugin/Groupone/Marketplace/assets",
+      "[ -d vendor/groupone/marketplace/frontend ] && rsync -a vendor/groupone/marketplace/frontend/ inc/Dependencies/YourPlugin/Groupone/Marketplace/frontend/ || true",
+      "[ -d vendor/groupone/marketplace/assets ] && rsync -a vendor/groupone/marketplace/assets/ inc/Dependencies/YourPlugin/Groupone/Marketplace/assets/ || true"
     ]
   },
   "config": {
@@ -109,8 +108,9 @@ require_once __DIR__ . '/vendor/autoload.php';
     'menu_title'       => 'Marketplace',
     'menu_slug'        => 'plugin-marketplace',
     'api_url'          => 'https://example.com/marketplace.json',
+    'brand'            => 'your_brand_name', // Optional: brand identifier for API filtering
     // Optional: Explicitly set assets path if auto-detection doesn't work
-    // 'assets_path'      => __DIR__ . '/vendor-prefixed/Groupone/Marketplace/',
+    // 'assets_path'      => __DIR__ . '/inc/Dependencies/YourPlugin/Groupone/Marketplace/',
 ]);
 ```
 
@@ -123,6 +123,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 - menu_title: Menu title for the submenu. Default: Marketplace
 - menu_slug: Slug used for the submenu and page. Default: plugin-marketplace
 - api_url: External API endpoint returning marketplace data. Default: ""
+- brand: Optional brand identifier used when constructing marketplace API requests. Can be used to filter or customize marketplace content based on brand. Default: ""
 - css_url: URL to a custom CSS file that styles the frontend. Default: ""
 - css_handle: WordPress style handle when registering/enqueuing styles. Default: marketplace-frontend-style
 - assets_path: Filesystem path to the package root containing the frontend/ directory. If empty, the module auto-detects it (see below).
@@ -136,7 +137,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 ```php
 \Groupone\Marketplace\Marketplace::run([
-  'assets_path' => WP_PLUGIN_DIR . '/your-plugin/vendor-prefixed/'
+  'assets_path' => WP_PLUGIN_DIR . '/your-plugin/inc/Dependencies/YourPlugin/'
 ]);
 ```
 

@@ -107,7 +107,7 @@ export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enabl
                     <div className="gv-grid gv-gap-lg gv-tab-grid-cols-1 gv-desk-grid-cols-2">
                         {list.map((plugin) => (
                             <a href="#" key={plugin.slug} className="gv-shortcut-tile gv-surface-bright" onClick={(e) => e.preventDefault()}>
-                                <gv-tile aria-hidden="true" src={`${assetsBaseUrl || (window.marketplaceConfig && window.marketplaceConfig.assetsBaseUrl) || ''}assets/icons/placeholder.svg`}></gv-tile>
+                                <gv-tile aria-hidden="true" src={`${assetsBaseUrl || (typeof window.marketplaceConfig !== 'undefined' && window.marketplaceConfig.assetsBaseUrl) || ''}assets/icons/placeholder.svg`}></gv-tile>
                                 <div className="gv-content">
                                     <h3 className="gv-title">{plugin.name}</h3>
                                         <p>{plugin.description ? plugin.description : plugin.shortDescription}</p>
@@ -116,7 +116,7 @@ export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enabl
                                             <span className="gv-price-text">{plugin.priceCurrency} {plugin.priceAmount}</span>
                                             <span className="gv-period">/mo</span>
                                         </div></div>
-                                        <gv-icon aria-hidden="true" src={`${assetsBaseUrl || (window.marketplaceConfig && window.marketplaceConfig.assetsBaseUrl) || ''}assets/icons/arrow_forward.svg`}></gv-icon>
+                                        <gv-icon aria-hidden="true" src={`${assetsBaseUrl || (typeof window.marketplaceConfig !== 'undefined' && window.marketplaceConfig && window.marketplaceConfig.assetsBaseUrl) || ''}assets/icons/arrow_forward.svg`}></gv-icon>
 
 
                                 {useWPHandlers ? (
@@ -139,8 +139,8 @@ export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enabl
                                                 }}
                                             >
                                                 {downloadingPlugins[plugin.slug]
-                                                    ? (marketplaceConfig?.labels?.downloading || 'Downloading...')
-                                                    : (marketplaceConfig?.labels?.download || 'Download')}
+                                                    ? ((typeof window.marketplaceConfig !== 'undefined' && window.marketplaceConfig?.labels?.downloading) || 'Downloading...')
+                                                    : ((typeof window.marketplaceConfig !== 'undefined' && window.marketplaceConfig?.labels?.download) || 'Download')}
                                             </a>
                                         </div>
                                     )
