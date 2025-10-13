@@ -8,6 +8,7 @@ export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enabl
     const [plugins, setPlugins] = useState([]);
     const [loading, setLoading] = useState(true);
     const [pluginInAction, setPluginInAction] = useState({});
+    const [downloadingPlugins, setDownloadingPlugins] = useState({});
     const {t} = useTranslation();
 
     useEffect(() => {
@@ -66,6 +67,19 @@ export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enabl
         }
     };
 
+    const handleDownloadClick = (e, plugin) => {
+        e.stopPropagation();
+        
+        // Set downloading state
+        setDownloadingPlugins(prev => ({ ...prev, [plugin.slug]: true }));
+        
+        // Reset after a short delay (download is triggered immediately)
+        // The browser handles the actual download, so we simulate completion
+        setTimeout(() => {
+            setDownloadingPlugins(prev => ({ ...prev, [plugin.slug]: false }));
+        }, 2000);
+    };
+
     if (loading) return <p>Loading plugins...</p>;
 
     // Group plugins by a single, specific category (first category), avoid duplicates across headings
@@ -118,9 +132,15 @@ export default function Marketplace({ apiBaseUrl, useWPHandlers, wpConfig, enabl
                                                 href={plugin.download}
                                                 download
                                                 className="gv-button gv-button-secondary"
-                                                onClick={(e) => e.stopPropagation()}
+                                                onClick={(e) => handleDownloadClick(e, plugin)}
+                                                style={{ 
+                                                    pointerEvents: downloadingPlugins[plugin.slug] ? 'none' : 'auto',
+                                                    opacity: downloadingPlugins[plugin.slug] ? 0.6 : 1
+                                                }}
                                             >
-                                                {marketplaceConfig?.labels?.download || 'Download'}
+                                                {downloadingPlugins[plugin.slug]
+                                                    ? (marketplaceConfig?.labels?.downloading || 'Downloading...')
+                                                    : (marketplaceConfig?.labels?.download || 'Download')}
                                             </a>
                                         </div>
                                     )

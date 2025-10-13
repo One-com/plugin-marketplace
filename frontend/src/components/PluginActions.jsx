@@ -15,8 +15,8 @@ export default function PluginActions({ plugin, pluginInAction, onAction }) {
                         onClick={() => handleClick("deactivate")}
                     >
                         {pluginInAction[plugin.slug]
-                            ? marketplaceConfig.labels.deactivating
-                            : marketplaceConfig.labels.deactivate}
+                            ? (marketplaceConfig?.labels?.deactivating || 'Deactivating...')
+                            : (marketplaceConfig?.labels?.deactivate || 'Deactivate')}
                     </button>
                 ) : (
                     <button
@@ -25,8 +25,8 @@ export default function PluginActions({ plugin, pluginInAction, onAction }) {
                         onClick={() => handleClick("activate")}
                     >
                         {pluginInAction[plugin.slug]
-                            ? marketplaceConfig.labels.activating
-                            : marketplaceConfig.labels.activate}
+                            ? (marketplaceConfig?.labels?.activating || 'Activating...')
+                            : (marketplaceConfig?.labels?.activate || 'Activate')}
                     </button>
                 )
             ) : (
@@ -36,8 +36,8 @@ export default function PluginActions({ plugin, pluginInAction, onAction }) {
                     onClick={() => handleClick("install")}
                 >
                     {pluginInAction[plugin.slug]
-                        ? marketplaceConfig.labels.installing
-                        : marketplaceConfig.labels.install}
+                        ? (marketplaceConfig?.labels?.installing || 'Installing...')
+                        : (marketplaceConfig?.labels?.install || 'Install')}
                 </button>
             )}
         </div>

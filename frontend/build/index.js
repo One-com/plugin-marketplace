@@ -3621,6 +3621,7 @@ function Marketplace({
   const [plugins, setPlugins] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]);
   const [loading, setLoading] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true);
   const [pluginInAction, setPluginInAction] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({});
+  const [downloadingPlugins, setDownloadingPlugins] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({});
   const {
     t
   } = (0,react_i18next__WEBPACK_IMPORTED_MODULE_4__.useTranslation)();
@@ -3677,6 +3678,24 @@ function Marketplace({
         [plugin.slug]: false
       }));
     }
+  };
+  const handleDownloadClick = (e, plugin) => {
+    e.stopPropagation();
+
+    // Set downloading state
+    setDownloadingPlugins(prev => ({
+      ...prev,
+      [plugin.slug]: true
+    }));
+
+    // Reset after a short delay (download is triggered immediately)
+    // The browser handles the actual download, so we simulate completion
+    setTimeout(() => {
+      setDownloadingPlugins(prev => ({
+        ...prev,
+        [plugin.slug]: false
+      }));
+    }, 2000);
   };
   if (loading) return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, "Loading plugins...");
 
@@ -3736,8 +3755,12 @@ function Marketplace({
     href: plugin.download,
     download: true,
     className: "gv-button gv-button-secondary",
-    onClick: e => e.stopPropagation()
-  }, marketplaceConfig?.labels?.download || 'Download'))))))));
+    onClick: e => handleDownloadClick(e, plugin),
+    style: {
+      pointerEvents: downloadingPlugins[plugin.slug] ? 'none' : 'auto',
+      opacity: downloadingPlugins[plugin.slug] ? 0.6 : 1
+    }
+  }, downloadingPlugins[plugin.slug] ? marketplaceConfig?.labels?.downloading || 'Downloading...' : marketplaceConfig?.labels?.download || 'Download'))))))));
 }
 
 /***/ }),
@@ -3771,15 +3794,15 @@ function PluginActions({
     className: "gv-button gv-button-secondary",
     disabled: pluginInAction[plugin.slug],
     onClick: () => handleClick("deactivate")
-  }, pluginInAction[plugin.slug] ? marketplaceConfig.labels.deactivating : marketplaceConfig.labels.deactivate) : (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("button", {
+  }, pluginInAction[plugin.slug] ? marketplaceConfig?.labels?.deactivating || 'Deactivating...' : marketplaceConfig?.labels?.deactivate || 'Deactivate') : (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("button", {
     className: "gv-button gv-button-primary",
     disabled: pluginInAction[plugin.slug],
     onClick: () => handleClick("activate")
-  }, pluginInAction[plugin.slug] ? marketplaceConfig.labels.activating : marketplaceConfig.labels.activate) : (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("button", {
+  }, pluginInAction[plugin.slug] ? marketplaceConfig?.labels?.activating || 'Activating...' : marketplaceConfig?.labels?.activate || 'Activate') : (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("button", {
     className: "gv-button gv-button-secondary",
     disabled: pluginInAction[plugin.slug],
     onClick: () => handleClick("install")
-  }, pluginInAction[plugin.slug] ? marketplaceConfig.labels.installing : marketplaceConfig.labels.install));
+  }, pluginInAction[plugin.slug] ? marketplaceConfig?.labels?.installing || 'Installing...' : marketplaceConfig?.labels?.install || 'Install'));
 }
 
 /***/ }),

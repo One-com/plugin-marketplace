@@ -227,6 +227,7 @@ class MarketplaceController {
 				'activating' => __('Activating', 'onecom-wp'),
 				'deactivating' => __('Deactivating', 'onecom-wp'),
 				'download' => __('Download', 'onecom-wp'),
+				'downloading' => __('Downloading...', 'onecom-wp'),
 				'learnMore' => __('Learn more', 'onecom-wp'),
 				'all' => __('All', 'onecom-wp'),
 				'recommendedPlugins' => __('Recommended plugins', 'onecom-wp'),
