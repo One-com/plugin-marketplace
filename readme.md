@@ -42,8 +42,7 @@ Example of a complete composer.json (minimal):
   },
   "autoload": {
     "psr-4": {
-      "YourVendor\\YourPlugin\\": "src/",
-      "YourPlugin\\Vendor\\": "inc/Dependencies/"
+      "YourPlugin\\Vendor\\": "/inc/Dependencies/YourPlugin/"
     },
     "classmap": [
       "inc/Dependencies/YourPlugin/"
