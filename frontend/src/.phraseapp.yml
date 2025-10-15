@@ -1,0 +1,19 @@
+phraseapp:
+  project_id: a442f264c41bee70e40736df8693c713
+  file_format: simple_json
+  push:
+    sources:
+      - file: ./i18n/en_US.json
+        params:
+          locale_id: 718c737e76dd3a0a2c4d6f52fb7612b9
+          update_translations: false
+          update_descriptions: true
+          tags: wp-migration-service
+          skip_unverification: false
+
+  pull:
+    targets:
+      - file: ./i18n/locales/<locale_name>.json
+        params:
+          file_format: simple_json
+          tags: wp-migration-service

@@ -1,6 +1,6 @@
 <?php
-namespace Onecom\Marketplace;
-use Onecom\Marketplace\Controllers\MarketplaceController;
+namespace Groupone\Marketplace;
+use Groupone\Marketplace\Controllers\MarketplaceController;
 
 /**
  * Market Place Embeddable Module
@@ -18,6 +18,10 @@ final class Marketplace {
 	 * @param array $config Configuration options for the marketplace module.
 	 */
 	public static function run( array $config = [] ) {
-		MarketplaceController::boot( $config );
+		try {
+			MarketplaceController::boot($config);
+		} catch (\Exception $e) {
+			error_log($e->getMessage());
+		}
 	}
 }

@@ -1,0 +1,12 @@
+src/
+build/
+node_modules/
+vite.config.js
+webpack.wp.js
+webpack.standalone.js
+package-lock.json
+composer.json
+composer.lock
+.DS_Store
+.gitignore
+.env

@@ -1,18 +1,46 @@
 {
-  "name": "@groupone/marketplace",
-  "version": "1.0.0",
-  "main": "build/index.js",
+  "name": "wp-marketplace",
+  "version": "1.0.0-beta.5",
+  "description": "React-based wp plugins marketplace module.",
+  "main": "standalone/index.es.js",
+  "module": "standalone/index.es.js",
+  "exports": {
+    ".": {
+      "import": "./standalone/index.es.js"
+    },
+    "./style.css": "./standalone/style.css"
+  },
+  "files": [
+    "standalone",
+    "README.md"
+  ],
   "scripts": {
     "start": "wp-scripts start",
-    "build": "wp-scripts build",
-    "build:standalone": "cross-env NODE_ENV=production webpack --config webpack.standalone.js"
+    "build": "webpack --config webpack.wp.js",
+    "build:standalone": "vite build"
+  },
+  "peerDependencies": {
+    "react": ">=18 || >=19",
+    "react-dom": ">=18 || >=19"
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
     "@wordpress/scripts": "^26.0.0",
     "cross-env": "^7.0.3",
+    "vite": "^5.0.0",
     "webpack": "^5.0.0",
-    "webpack-cli": "^5.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "webpack-cli": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/One-com/wp-marketplace.git"
+  },
+  "author": "One.com",
+  "license": "GPL-2.0-or-later",
+  "dependencies": {
+    "react-i18next": "^15.7.3"
   }
 }
