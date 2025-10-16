@@ -24,7 +24,7 @@ Step-by-step
 
 1) Add repository and dependency to your plugin's composer.json
 
-Example of a complete composer.json (minimal):
+Example of a complete composer.json (replace `YourPlugin` with your plugin's namespace and path in`copy-assets` where you want to copy assets ):
 
 ```json
 {
@@ -35,7 +35,7 @@ Example of a complete composer.json (minimal):
     "groupone/marketplace": "^1.0"
   },
   "repositories": [
-    { "type": "vcs", "url": "git@gitlab.group.one:wp-in/marketplace.git" }
+    { "type": "vcs", "url": "git@github.com:One-com/wp-marketplace.git" }
   ],
   "require-dev": {
     "coenjacobs/mozart": "^0.7"
@@ -50,7 +50,7 @@ Example of a complete composer.json (minimal):
   },
   "extra": {
     "mozart": {
-      "dep_namespace": "YourPlugin\\Vendor\\",
+      "dep_namespace": "YourPlugin\\Dependencies\\",
       "dep_directory": "/inc/Dependencies/YourPlugin/",
       "classmap_directory": "/inc/Dependencies/YourPlugin/",
       "packages": [
@@ -94,14 +94,14 @@ Example of a complete composer.json (minimal):
 composer install
 ```
 
-3) Bootstrap the module in your plugin code
+3) Bootstrap the module in your plugin code(replace `YourPlugin` with your plugin's namespace)
 
 ```php
 // Composer autoloader registers both your plugin classes and the Mozart-prefixed dependencies
 require_once __DIR__ . '/vendor/autoload.php';
 
 // Using the Mozart-prefixed class name after Composer autoload is registered
-\YourPlugin\Vendor\Groupone\Marketplace\Marketplace::run([
+\YourPlugin\Dependencies\Groupone\Marketplace\Marketplace::run([
     'parent_menu_slug' => 'your-menu-slug',
     'page_title'       => 'Plugin Marketplace',
     'menu_title'       => 'Marketplace',
@@ -109,7 +109,7 @@ require_once __DIR__ . '/vendor/autoload.php';
     'api_url'          => 'https://example.com/marketplace.json',
     'brand'            => 'your_brand_name', // Optional: brand identifier for API filtering
     // Optional: Explicitly set assets path if auto-detection doesn't work
-    // 'assets_path'      => __DIR__ . '/inc/Dependencies/YourPlugin/Groupone/Marketplace/',
+    'assets_path'      => __DIR__ . '/inc/Dependencies/YourPlugin/Groupone/Marketplace/',
 ]);
 ```
 
